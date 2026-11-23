@@ -1,0 +1,21 @@
+[project]
+name = "ecb-lab-server"
+version = "0.1.0"
+description = "ECB A2-P1: the microbiology network's server, on Postgres with roles and row level security, reports and backups on RustFS"
+requires-python = ">=3.14"
+dependencies = ["oxid==0.27.1", "psycopg[binary]==3.2.13", "boto3==1.40.70"]
+
+[dependency-groups]
+dev = ["pytest", "ruff"]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint.isort]
+known-first-party = ["lab", "server", "conftest"]

@@ -1,0 +1,15 @@
+# Your machine's Postgres and RustFS, the same versions as Isard's: `docker compose up -d`.
+# The passwords are for this laptop only; Isard's and Azure's are in .env files, never in git.
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_PASSWORD: password
+    ports: ["5432:5432"]
+  rustfs:
+    image: rustfs/rustfs:1.0.6
+    environment:
+      RUSTFS_ACCESS_KEY: admin
+      RUSTFS_SECRET_KEY: password
+      RUSTFS_CONSOLE_ENABLE: "true"
+    ports: ["9000:9000", "9001:9001"]

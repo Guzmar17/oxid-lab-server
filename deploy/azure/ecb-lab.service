@@ -1,0 +1,19 @@
+[Unit]
+Description=ECB A2-P1: the microbiology network's server, oxid-server
+After=network-online.target wg-quick@isard.service
+Wants=network-online.target wg-quick@isard.service
+
+[Service]
+Type=notify
+NotifyAccess=all
+User=ecb
+WorkingDirectory=/srv/ecb-lab/app
+# ECB_DATABASE_URL, ECB_S3_*: 0600, root's; never in the repository.
+EnvironmentFile=/etc/ecb-lab.env
+# 127.0.0.1:8001: only Caddy talks to it (A1's server keeps 8000). CPython: psycopg and boto3.
+ExecStart=/srv/ecb-lab/app/.venv/bin/oxid-server server.py --addr 127.0.0.1:8001 --runtime cpython
+TimeoutStopSec=20
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,29 @@
+# Every push: a clean environment from uv.lock, a Postgres 18 and a RustFS beside it, every test.
+# A red pipeline is what the teacher sees first.
+image: ghcr.io/astral-sh/uv:python3.14-bookworm-slim
+
+variables:
+  UV_CACHE_DIR: .uv-cache
+  UV_LINK_MODE: copy
+  POSTGRES_PASSWORD: password
+  RUSTFS_ACCESS_KEY: admin
+  RUSTFS_SECRET_KEY: password
+  ECB_ADMIN_URL: postgresql://postgres:password@postgres:5432/postgres
+  ECB_S3_ENDPOINT: http://rustfs:9000
+  ECB_BACKUP_S3_ENDPOINT: http://rustfs:9000
+
+cache:
+  key:
+    files: [uv.lock]
+  paths: [.uv-cache]
+
+test:
+  services:
+    - name: postgres:18
+      alias: postgres
+    - name: rustfs/rustfs:1.0.6
+      alias: rustfs
+  script:
+    - uv sync --frozen
+    - for i in $(seq 30); do uv run --frozen python -c "import os, psycopg; psycopg.connect(os.environ['ECB_ADMIN_URL'], connect_timeout=2).close()" && break; sleep 2; done
+    - uv run --frozen pytest -q

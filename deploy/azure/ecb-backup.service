@@ -1,0 +1,12 @@
+[Unit]
+Description=ECB A2-P1: the database's copy to RustFS
+After=network-online.target wg-quick@isard.service
+Wants=wg-quick@isard.service
+
+[Service]
+Type=oneshot
+User=ecb
+WorkingDirectory=/srv/ecb-lab/app
+# ECB_BACKUP_URL, ECB_BACKUP_S3_*: the backup's own credentials, not the server's.
+EnvironmentFile=/etc/ecb-backup.env
+ExecStart=/srv/ecb-lab/app/.venv/bin/python -m lab.backup
