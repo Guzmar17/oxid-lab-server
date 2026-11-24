@@ -1,6 +1,6 @@
 # Informe · ecb-lab-server
 
-Nom i cognoms:
+Nom i cognoms: Abraham Cristopher Guzman Martinez
 
 URL pública: `https://ecb-<nom>-<cognom>.francecentral.cloudapp.azure.com/lab/api/me`
 
@@ -16,6 +16,21 @@ La sortida de `\dp lab.*` i de `select * from pg_policies where schemaname = 'la
 `ecb_app` a Isard.
 
 Per què `ecb_app` és `noinherit`, i què passaria si no ho fos.
+
+**R1 · `noinherit`.** `ecb_app` és membre de `clinician` i de `microbiologist`
+([db/1_roles.sql](db/1_roles.sql)), però amb `noinherit` no hereta cap privilegi dels dos grups:
+connectat i sense `set role`, no pot llegir ni escriure cap taula de `lab`. Només té els drets
+d'un grup després de `set local role clinician` (o `microbiologist`), que el servidor fa a cada
+petició segons qui l'envia, i que s'acaba amb la transacció. Així cada consulta s'executa amb
+els privilegis i les polítiques d'un sol grup, i el mínim que pot fer `ecb_app` per si sol és
+res.
+
+Si fos `inherit`, `ecb_app` tindria sempre la unió dels privilegis dels dos grups sense fer
+`set role`: una petició que oblidés el `set local role`, o algú que aconseguís enviar SQL per
+la connexió del servidor, podria llegir i escriure tot el que pot qualsevol dels dos grups (un
+clínic faria coses de microbiòleg i al revés). A més, les polítiques escrites per a
+`current_user = clinician` o `microbiologist` no s'aplicarien bé, perquè `current_user` seria
+`ecb_app`: la separació entre grups dependria només que el codi no s'equivoqués mai.
 
 ## R7 · La sessió
 
